@@ -1,23 +1,32 @@
 // ===============================
+// ESCAPE HTML (ANTI-XSS)
+// ===============================
+
+function escapeHTML(str) {
+  if (!str) return "";
+  return str.replace(/[&<>"']/g, (match) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[match]));
+}
+
+// ===============================
 // PRELOADER
 // ===============================
 
-window.addEventListener("load",function(){
+window.addEventListener("load", function () {
+  const preloader = document.getElementById("preloader");
 
-    const preloader=document.getElementById("preloader");
+  setTimeout(() => {
+    preloader.style.opacity = "0";
 
-    setTimeout(()=>{
-
-        preloader.style.opacity="0";
-
-        setTimeout(()=>{
-
-            preloader.style.display="none";
-
-        },800);
-
-    },1200);
-
+    setTimeout(() => {
+      preloader.style.display = "none";
+    }, 800);
+  }, 1200);
 });
 
 const openBtn = document.getElementById("openInvitation");
@@ -29,37 +38,30 @@ const musicBtn = document.getElementById("musicBtn");
 music.volume = 0.5;
 
 openBtn.addEventListener("click", function () {
+  coverScreen.classList.add("fade-out");
 
-    coverScreen.classList.add("fade-out");
+  music.play().catch((err) => {
+    console.log("Autoplay diblokir:", err);
+    musicBtn.classList.remove("playing");
+  });
 
-    music.play();
+  musicBtn.style.display = "flex";
+  musicBtn.classList.add("playing");
 
-    musicBtn.style.display = "flex";
-
-    musicBtn.classList.add("playing");
-
-    setTimeout(() => {
-
-        coverScreen.style.display = "none";
-
-        startAutoScroll();
-
-    }, 800);
-
+  setTimeout(() => {
+    coverScreen.style.display = "none";
+    startAutoScroll();
+  }, 800);
 });
 
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwrHji0oU0VPiLM7lhkhGMd53HvzZJplOXwqRYE-ox-z_f4rGo1FluF_EgG6mU6Bpc/exec";
 
 // ===============================
-// BUKA UNDANGAN
-// ===============================
-
-// ===============================
 // COUNTDOWN
 // ===============================
 
-const weddingDate = new Date("Oct 24, 2026 10:00:00").getTime();
+const weddingDate = new Date("2026-10-24T10:00:00+07:00").getTime();
 
 const countdown = setInterval(() => {
   const now = new Date().getTime();
@@ -75,15 +77,41 @@ const countdown = setInterval(() => {
 
   const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
+  if (distance < 0) {
+    clearInterval(countdown);
+
+    document.querySelector(".mini-countdown").innerHTML =
+      '<p style="grid-column: 1 / -1; color: var(--maroon); font-family: \'Cinzel\', serif; font-size: 18px; font-weight: 600; letter-spacing: 1px;">Hari bahagia telah tiba! 🎉</p>';
+
+    return;
+  }
+
   document.getElementById("days").innerHTML = days;
   document.getElementById("hours").innerHTML = hours;
   document.getElementById("minutes").innerHTML = minutes;
   document.getElementById("seconds").innerHTML = seconds;
-
-  if (distance < 0) {
-    clearInterval(countdown);
-  }
 }, 1000);
+
+// ===============================
+// ADD TO CALENDAR
+// ===============================
+
+const calendarBtn = document.getElementById("addToCalendar");
+
+if (calendarBtn) {
+  const startDate = "20261024T100000";
+  const endDate = "20261024T130000";
+
+  const calendarUrl =
+    "https://www.google.com/calendar/render?action=TEMPLATE" +
+    "&text=" + encodeURIComponent("Akad Nikah & Resepsi Lara & Deza") +
+    "&dates=" + startDate + "/" + endDate +
+    "&details=" + encodeURIComponent("Akad Nikah & Resepsi Lara & Deza") +
+    "&location=" + encodeURIComponent("Tanjung Saba, Bayang, Pesisir Selatan") +
+    "&ctz=Asia/Jakarta";
+
+  calendarBtn.href = calendarUrl;
+}
 
 // ===============================
 // COPY REKENING
@@ -110,7 +138,7 @@ const guestBox = document.querySelector(".guest-box");
 const guestName = document.getElementById("guestName");
 
 if (guest) {
-  guestName.innerHTML = guest.replace(/~/g, "<br>");
+  guestName.innerHTML = escapeHTML(guest).replace(/~/g, "<br>");
 } else {
   guestBox.classList.add("hidden");
 }
@@ -214,13 +242,9 @@ function getStatus(status) {
 function formatTanggal(waktu) {
   return new Date(waktu).toLocaleString("id-ID", {
     day: "2-digit",
-
     month: "long",
-
     year: "numeric",
-
     hour: "2-digit",
-
     minute: "2-digit",
   });
 }
@@ -238,7 +262,7 @@ function createWishCard(item) {
 
                 <i class="fa-solid fa-user"></i>
 
-                ${item.nama}
+                ${escapeHTML(item.nama)}
 
             </div>
 
@@ -252,7 +276,7 @@ function createWishCard(item) {
 
         <div class="wish-message">
 
-            ${item.ucapan}
+            ${escapeHTML(item.ucapan)}
 
         </div>
 
@@ -269,99 +293,85 @@ function createWishCard(item) {
     `;
 }
 
-    function updateStatistik(data) {
-      let hadir = 0;
-      let ragu = 0;
-      let tidak = 0;
+function updateStatistik(data) {
+  let hadir = 0;
+  let ragu = 0;
+  let tidak = 0;
 
-      data.forEach((item) => {
-        if (item.kehadiran === "Hadir") {
-          hadir++;
-        } else if (item.kehadiran === "Masih Ragu") {
-          ragu++;
-        } else {
-          tidak++;
-        }
-      });
-
-      document.getElementById("totalUcapan").innerText = data.length;
-      document.getElementById("totalHadir").innerText = hadir;
-      document.getElementById("totalRagu").innerText = ragu;
-      document.getElementById("totalTidakHadir").innerText = tidak;
+  data.forEach((item) => {
+    if (item.kehadiran === "Hadir") {
+      hadir++;
+    } else if (item.kehadiran === "Masih Ragu") {
+      ragu++;
+    } else {
+      tidak++;
     }
+  });
+
+  document.getElementById("totalUcapan").innerText = data.length;
+  document.getElementById("totalHadir").innerText = hadir;
+  document.getElementById("totalRagu").innerText = ragu;
+  document.getElementById("totalTidakHadir").innerText = tidak;
+}
 
 // ===============================
 // AMBIL UCAPAN
 // ===============================
 
 async function loadWishes() {
-
-    try{
-
-        wishList.innerHTML=`
+  try {
+    wishList.innerHTML = `
             <div class="wish-card">
                 Sedang memuat ucapan...
             </div>
         `;
 
-        const response = await fetch(SCRIPT_URL);
+    const response = await fetch(SCRIPT_URL);
 
-        const data = await response.json();
+    const data = await response.json();
 
-        console.log(data);
+    console.log(data);
 
-        wishList.innerHTML="";
+    wishList.innerHTML = "";
 
-        updateStatistik(data);
+    updateStatistik(data);
 
-        data.reverse();
+    data.reverse();
 
-const totalUcapan = data.length;
+    const totalUcapan = data.length;
 
-const terbaru = data.slice(0, 3);
+    const terbaru = data.slice(0, 3);
 
-terbaru.forEach(item => {
+    terbaru.forEach((item) => {
+      wishList.innerHTML += createWishCard(item);
+    });
 
-    wishList.innerHTML += createWishCard(item);
-
-});
-
-if (totalUcapan > 3) {
-
-    wishList.innerHTML += `
+    if (totalUcapan > 3) {
+      wishList.innerHTML += `
         <button id="showAllWish" class="show-more-btn">
             Lihat Semua Ucapan (${totalUcapan})
         </button>
     `;
 
-    document
+      document
         .getElementById("showAllWish")
         .addEventListener("click", function () {
+          wishList.innerHTML = "";
 
-            wishList.innerHTML = "";
-
-            data.forEach(item => {
-
-                wishList.innerHTML += createWishCard(item);
-
-            });
-
+          data.forEach((item) => {
+            wishList.innerHTML += createWishCard(item);
+          });
         });
+    }
+  } catch (error) {
+    console.log(error);
 
-}
-
-    }catch(error){
-
-        console.log(error);
-
-        wishList.innerHTML=`
+    wishList.innerHTML = `
             <div class="wish-card">
                 Gagal memuat ucapan.
             </div>
         `;
-
-    }
-
+  }
 }
 
 loadWishes();
@@ -411,53 +421,55 @@ wishForm.addEventListener("submit", async function (e) {
   loading.style.display = "none";
 });
 
-const sections=document.querySelectorAll("section[id]");
-const navLinks=document.querySelectorAll(".bottom-nav a");
+const sections = document.querySelectorAll("section[id]");
+const navLinks = document.querySelectorAll(".bottom-nav a");
 
-window.addEventListener("scroll",()=>{
+window.addEventListener("scroll", () => {
+  let current = "";
 
-    let current="";
+  sections.forEach((section) => {
+    const top = section.offsetTop - 120;
 
-    sections.forEach(section=>{
-
-        const top=section.offsetTop-120;
-
-        if(window.scrollY>=top){
-
-            current=section.getAttribute("id");
-
-        }
-
-    });
-
-    navLinks.forEach(link=>{
-
-        link.classList.remove("active");
-
-        if(link.getAttribute("href")==="#"+current){
-
-            link.classList.add("active");
-
-        }
-
-    });
-
-});
-
-musicBtn.addEventListener("click",function(){
-
-    if(music.paused){
-
-        music.play();
-
-        musicBtn.classList.add("playing");
-
-    }else{
-
-        music.pause();
-
-        musicBtn.classList.remove("playing");
-
+    if (window.scrollY >= top) {
+      current = section.getAttribute("id");
     }
+  });
 
+  navLinks.forEach((link) => {
+    link.classList.remove("active");
+
+    if (link.getAttribute("href") === "#" + current) {
+      link.classList.add("active");
+    }
+  });
 });
+
+musicBtn.addEventListener("click", function () {
+  if (music.paused) {
+    music.play();
+
+    musicBtn.classList.add("playing");
+  } else {
+    music.pause();
+
+    musicBtn.classList.remove("playing");
+  }
+});
+
+// ===============================
+// PETALS (KELOPAK MELAYANG)
+// ===============================
+
+const petalContainer = document.getElementById("petals");
+
+if (petalContainer) {
+  for (let i = 0; i < 12; i++) {
+    const petal = document.createElement("div");
+    petal.className = "petal";
+    petal.style.left = Math.random() * 100 + "%";
+    petal.style.animationDuration = 8 + Math.random() * 6 + "s";
+    petal.style.animationDelay = Math.random() * 8 + "s";
+    petal.style.width = petal.style.height = 6 + Math.random() * 6 + "px";
+    petalContainer.appendChild(petal);
+  }
+}
