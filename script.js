@@ -104,19 +104,38 @@ const countdown = setInterval(() => {
 const calendarBtn = document.getElementById("addToCalendar");
 
 if (calendarBtn) {
-const eventStart = new Date("2026-09-04T09:00:00+07:00");
-const eventEnd   = new Date("2026-09-04T17:00:00+07:00");
 
-const calendarUrl =
-  "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-  "&text=" + encodeURIComponent("Akad Nikah & Resepsi Eka & Arian") +
-  "&dates=" + eventStart.toISOString().slice(0, 19).replace('T', ' ') + "/" + eventEnd.toISOString().slice(0, 19).replace('T', ' ') +
-  "&details=" + encodeURIComponent(
-      "Akad Nikah & Resepsi Eka & Arian"
-  ) +
-  "&location=" + encodeURIComponent(
+  const startDate = "20260904T090000";
+  const endDate   = "20260904T170000";
+
+  const calendarUrl =
+    "https://www.google.com/calendar/render?action=TEMPLATE" +
+    "&text=" +
+    encodeURIComponent("Akad Nikah & Resepsi Eka & Arian") +
+    "&dates=" +
+    startDate +
+    "/" +
+    endDate +
+    "&details=" +
+    encodeURIComponent(
+`Akad Nikah : 09.00 WIB
+Resepsi : 10.00 WIB
+
+Lokasi:
+Perumnas Mutiara Indah No.09
+Lubuk Kilangan, Padang
+
+Kami mengharapkan kehadiran serta doa restu dari Bapak/Ibu/Saudara/i.`
+    ) +
+    "&location=" +
+    encodeURIComponent(
       "Perumnas Mutiara Indah No.09, Lubuk Kilangan, Padang"
-  );
+    ) +
+    "&ctz=Asia/Jakarta";
+
+  calendarBtn.href = calendarUrl;
+
+}
 
 // ===============================
 // COPY REKENING
