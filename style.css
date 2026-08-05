@@ -439,6 +439,28 @@ button:hover {
   position: relative;
 }
 
+.event-item{
+    margin-top:20px;
+}
+
+.event-item h3{
+    font-family:"Cinzel", serif;
+    color:var(--gold);
+    font-size:26px;
+    margin-bottom:15px;
+}
+
+.event-item p{
+    line-height:1.9;
+    color:var(--text);
+}
+
+.event-divider{
+    border:none;
+    border-top:1px dashed rgba(200,155,60,.6);
+    margin:28px 0;
+}
+
 .add-calendar-btn {
   display: inline-flex;
   align-items: center;

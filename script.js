@@ -4,13 +4,17 @@
 
 function escapeHTML(str) {
   if (!str) return "";
-  return str.replace(/[&<>"']/g, (match) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[match]));
+  return str.replace(
+    /[&<>"']/g,
+    (match) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[match],
+  );
 }
 
 // ===============================
@@ -56,12 +60,13 @@ openBtn.addEventListener("click", function () {
 
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwrHji0oU0VPiLM7lhkhGMd53HvzZJplOXwqRYE-ox-z_f4rGo1FluF_EgG6mU6Bpc/exec";
+const SHEET_NAME = "Eka-Arian";
 
 // ===============================
 // COUNTDOWN
 // ===============================
 
-const weddingDate = new Date("2026-10-24T10:00:00+07:00").getTime();
+const weddingDate = new Date("2026-09-04T09:00:00+07:00").getTime();
 
 const countdown = setInterval(() => {
   const now = new Date().getTime();
@@ -81,7 +86,7 @@ const countdown = setInterval(() => {
     clearInterval(countdown);
 
     document.querySelector(".mini-countdown").innerHTML =
-      '<p style="grid-column: 1 / -1; color: var(--maroon); font-family: \'Cinzel\', serif; font-size: 18px; font-weight: 600; letter-spacing: 1px;">Hari bahagia telah tiba! 🎉</p>';
+      "<p style=\"grid-column: 1 / -1; color: var(--maroon); font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; letter-spacing: 1px;\">Hari bahagia telah tiba! 🎉</p>";
 
     return;
   }
@@ -99,15 +104,21 @@ const countdown = setInterval(() => {
 const calendarBtn = document.getElementById("addToCalendar");
 
 if (calendarBtn) {
-  const startDate = "20261024T100000";
-  const endDate = "20261024T130000";
+  const startDate = "20260904T090000";
+  const endDate = "20260904T170000";
 
   const calendarUrl =
     "https://www.google.com/calendar/render?action=TEMPLATE" +
-    "&text=" + encodeURIComponent("Akad Nikah & Resepsi Lara & Deza") +
-    "&dates=" + startDate + "/" + endDate +
-    "&details=" + encodeURIComponent("Akad Nikah & Resepsi Lara & Deza") +
-    "&location=" + encodeURIComponent("Tanjung Saba, Bayang, Pesisir Selatan") +
+    "&text=" +
+    encodeURIComponent("Akad Nikah & Resepsi Eka & Arian") +
+    "&dates=" +
+    startDate +
+    "/" +
+    endDate +
+    "&details=" +
+    encodeURIComponent("Akad Nikah & Resepsi Eka & Arian") +
+    "&location=" +
+    encodeURIComponent("Perumnas Mutiara Indah No 09, Lubuk Kilangan, Padang") +
     "&ctz=Asia/Jakarta";
 
   calendarBtn.href = calendarUrl;
@@ -326,9 +337,15 @@ async function loadWishes() {
             </div>
         `;
 
-    const response = await fetch(SCRIPT_URL);
+    console.log(SCRIPT_URL + "?sheet=" + encodeURIComponent(SHEET_NAME));
+
+    const response = await fetch(
+      SCRIPT_URL + "?sheet=" + encodeURIComponent(SHEET_NAME),
+    );
 
     const data = await response.json();
+
+    console.log("Data dari Apps Script:", data);
 
     console.log(data);
 
@@ -389,6 +406,8 @@ wishForm.addEventListener("submit", async function (e) {
   loading.style.display = "block";
 
   const data = {
+    sheet: SHEET_NAME,
+
     nama: document.getElementById("nama").value,
 
     kehadiran: document.getElementById("kehadiran").value,
